@@ -56,3 +56,19 @@ jobs:
       - name: Push Docker image
         run: |
           docker push swbanerjee/demo-app:${{ env.version }}
+      # Update the K8s Manifest Files
+      - name: Update K8s Manifests
+        run: |
+          cat deploy/deploy.yaml
+          sed -i "s|image: swbanerjee/demo-app:.*|image: swbanerjee/demo-app:${{ env.VERSION }}|g " deploy/deploy.yaml
+          cat deploy/deploy.yaml
+
+      # Update Github
+      - name: Commit the changes
+        run: |
+          git config --global user.email "<>"
+          git config --global user.name "GitHub Actions Bot"
+          git add deploy/deploy.yaml
+          git commit -m "Update deploy.yaml with new image version - ${{ env.VERSION }}"
+          git remote set-url origin https://github-actions:${{ secrets.GITHUB_TOKEN }}@github.com:Swagata-ux/Flask-app-Argo-CD.git
+          git push origin master
